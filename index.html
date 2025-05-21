@@ -3,53 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detector de Navegação</title>
+    <title>Detector de Saída</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             padding: 50px;
         }
-        #message {
+        #status {
             color: red;
             font-size: 24px;
             margin: 20px;
-            display: none;
         }
         button {
             padding: 10px 20px;
-            font-size: 18px;
+            font-size: 16px;
             cursor: pointer;
-            background-color: #4CAF50;
+            background-color: #ff4444;
             color: white;
             border: none;
             border-radius: 5px;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
     <h1>Monitor de Atividade</h1>
-    <div id="message">Você trocou de página ou recarregou!</div>
-    <button id="resetButton">Resetar Detecção</button>
+    <div id="status">Monitorando sua atividade...</div>
+    <button onclick="resetTracker()">Resetar Contador</button>
 
     <script>
-        // Verifica se há registro de navegação anterior
-        window.addEventListener('DOMContentLoaded', (event) => {
-            if (localStorage.getItem('pageLeft')) {
-                document.getElementById('message').style.display = 'block';
+        let pageLeft = false;
+        let hiddenTime;
+
+        // Detecta quando a visibilidade da página muda
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // Página oculta
+                hiddenTime = new Date().getTime();
+                localStorage.setItem('pageHidden', hiddenTime);
+            } else {
+                // Página visível novamente
+                if (localStorage.getItem('pageHidden')) {
+                    const timeDiff = Math.floor((new Date().getTime() - localStorage.getItem('pageHidden')) / 1000);
+                    document.getElementById('status').innerHTML = 
+                        `Você esteve fora por ${timeDiff} segundos!`;
+                    pageLeft = true;
+                }
             }
         });
 
-        // Detecta quando o usuário está saindo da página
+        // Detecta recarregamento ou fechamento da página
         window.addEventListener('beforeunload', (event) => {
-            localStorage.setItem('pageLeft', 'true');
+            if (!pageLeft) {
+                localStorage.setItem('pageHidden', new Date().getTime());
+            }
         });
 
-        // Botão de reset
-        document.getElementById('resetButton').addEventListener('click', () => {
-            localStorage.removeItem('pageLeft');
-            document.getElementById('message').style.display = 'none';
+        // Verifica ao carregar a página
+        window.addEventListener('load', () => {
+            if (localStorage.getItem('pageHidden')) {
+                const timeDiff = Math.floor((new Date().getTime() - localStorage.getItem('pageHidden')) / 1000);
+                document.getElementById('status').innerHTML = 
+                    `Você esteve fora por ${timeDiff} segundos!`;
+                pageLeft = true;
+            }
         });
+
+        // Função de reset
+        function resetTracker() {
+            localStorage.removeItem('pageHidden');
+            pageLeft = false;
+            document.getElementById('status').innerHTML = 'Monitorando sua atividade...';
+        }
     </script>
 </body>
 </html>
