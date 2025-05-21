@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detector de Navegação</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        #message {
+            color: red;
+            font-size: 24px;
+            margin: 20px;
+            display: none;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Monitor de Atividade</h1>
+    <div id="message">Você trocou de página ou recarregou!</div>
+    <button id="resetButton">Resetar Detecção</button>
+
+    <script>
+        // Verifica se há registro de navegação anterior
+        window.addEventListener('DOMContentLoaded', (event) => {
+            if (localStorage.getItem('pageLeft')) {
+                document.getElementById('message').style.display = 'block';
+            }
+        });
+
+        // Detecta quando o usuário está saindo da página
+        window.addEventListener('beforeunload', (event) => {
+            localStorage.setItem('pageLeft', 'true');
+        });
+
+        // Botão de reset
+        document.getElementById('resetButton').addEventListener('click', () => {
+            localStorage.removeItem('pageLeft');
+            document.getElementById('message').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
